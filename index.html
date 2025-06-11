@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>打小人網頁程式</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      margin: 0;
+      min-height: 100vh;
+      justify-content: center;
+    }
+    h1 {
+      margin: 10px 0;
+      font-size: 28px;
+    }
+    #container {
+      position: relative;
+      width: 200px;
+      height: 300px;
+      margin: 10px 0;
+    }
+    #villainCanvas {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 160px;
+    }
+    #slipper {
+      position: absolute;
+      width: 60px;
+      bottom: 150px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: bottom 0.2s ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #subtitle {
+      margin: 10px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #b30000;
+      min-height: 24px;
+      user-select: none;
+      text-align: center;
+    }
+    #inputSection {
+      display: flex;
+      gap: 8px;
+      margin: 5px 0;
+    }
+    #nameInput {
+      font-size: 16px;
+      padding: 5px 8px;
+      width: 150px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    #nameInput:focus {
+      border-color: #b30000;
+    }
+    #startBtn {
+      font-size: 16px;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 5px;
+      background-color: #b30000;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+    #startBtn:hover {
+      background-color: #e60000;
+    }
+  </style>
+</head>
+<body>
+  <h1>打小人網頁程式</h1>
+  <div id="inputSection">
+    <input id="nameInput" type="text" placeholder="輸入你討厭的小人名字" maxlength="12" />
+    <button id="startBtn">開始打小人</button>
+  </div>
+  <div id="container">
+    <canvas id="villainCanvas" width="120" height="160"></canvas>
+    <img id="slipper" src="assets/slipper.png" alt="拖鞋" />
+  </div>
+  <div id="subtitle"></div>
+
+  <audio id="slapSound" src="assets/slap.mp3"></audio>
+
+  <script>
+    const subtitles = [
+      "打你個小人頭，打到你喘不了氣…",
+      "打你個小人手，打到你有錢都不敢拿…",
+      "打你個小人腳，打到你有鞋都沒腳穿…",
+      "打你個小人口，打到你有苦難開口…",
+      "打你個小人肚，打到你日日被人告…",
+      "打你個壞運…",
+      "好運快來到…",
+      "繼續打！"
+    ];
+
+    const startBtn = document.getElementById("startBtn");
+    const nameInput = document.getElementById("nameInput");
+    const villainCanvas = document.getElementById("villainCanvas");
+    const ctx = villainCanvas.getContext("2d");
+    const slipper = document.getElementById("slipper");
+    const subtitle = document.getElementById("subtitle");
+    const sound = document.getElementById("slapSound");
+
+    // 頁面載入時顯示小人圖片
+    const villainImg = new Image();
+    villainImg.src = "assets/villain.png";
+    villainImg.onload = () => {
+      ctx.clearRect(0, 0, villainCanvas.width, villainCanvas.height);
+      ctx.drawImage(villainImg, 0, 0, 120, 160);
+    };
+
+    startBtn.addEventListener("click", () => {
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert("請輸入小人名字！");
+        return;
+      }
+      subtitle.innerText = "";
+      let animationCount = 0; // 修正拼寫錯誤
+      let soundCount = 0;
+
+      // 繪製小人圖片並添加紅色名字
+      ctx.clearRect(0, 0, villainCanvas.width, villainCanvas.height);
+      ctx.drawImage(villainImg, 0, 0, 120, 160);
+      ctx.font = "bold 16px Noto Sans TC";
+      ctx.fillStyle = "#b30000";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(name, 60, 80);
+
+      slipper.style.bottom = "150px";
+
+      function slapOnce() {
+        if (animationCount >= 9) {
+          subtitle.innerText = "打完了，心情好多了吧？";
+          slipper.style.bottom = "150px";
+          return;
+        }
+
+        // 顯示字幕
+        if (animationCount < 5) {
+          subtitle.innerText = subtitles[animationCount % subtitles.length];
+        } else {
+          subtitle.innerText = "繼續打！最後一擊！";
+        }
+
+        // 拖鞋動畫
+        slipper.style.bottom = "90px";
+        if (animationCount < 5) {
+          sound.currentTime = 0;
+          sound.play();
+          soundCount++;
+        }
+
+        setTimeout(() => {
+          slipper.style.bottom = "150px";
+          animationCount++;
+          if (animationCount < 9) {
+            setTimeout(slapOnce, 400);
+          } else {
+            subtitle.innerText = "打完了，心情好多了吧？";
+          }
+        }, 200);
+      }
+
+      slapOnce();
+    });
+  </script>
+</body>
+</html>
